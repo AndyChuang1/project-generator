@@ -6,18 +6,31 @@ module.exports = class extends Generator {
     super(args, opts);
   }
   async ProjectName() {
-    this.options = await this.prompt([
+    const answer = await this.prompt([
       {
         type: 'input',
-        name: 'name',
+        name: 'projectName',
         message: 'Your project name',
         default: this.appname, // Default to current folder name
       },
     ]);
-    this.log('App name : ', this.options);
+    const redisPrefix =
+      `${answer.projectName
+        .split('-')
+        .map((str) => str[0])
+        .join('')}:` || `${this.appname}:`;
+    this.options = {
+      projectName: answer.projectName,
+      redis: {
+        prefix: redisPrefix,
+      },
+    };
+
+    this.log('App name : ', this.options.projectName);
+    this.log('Redis prefix : ', this.options.redis.prefix);
   }
   async Database() {
-    this.options = await this.prompt([
+    const answer = await this.prompt([
       {
         type: 'checkbox',
         name: 'database',
@@ -26,6 +39,14 @@ module.exports = class extends Generator {
         // default: this.appname, // Default to current folder name
       },
     ]);
-    this.log('App name : ', this.options.database);
+    this.log(answer);
+    this.options.database = answer.database;
+    // this.log('Database result : ', this.options.database);
+    // this.log(this.templatePath());
+    // this.log(this.destinationPath());
+  }
+  writing() {
+    this.log('Finnal options : ' + JSON.stringify(this.options));
+    this.fs.copyTpl(`${this.templatePath()}/**`, this.destinationPath(), this.options);
   }
 };
