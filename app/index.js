@@ -1,4 +1,5 @@
 var Generator = require('yeoman-generator');
+const fs = require('fs');
 module.exports = class extends Generator {
   // The name `constructor` is important here
   constructor(args, opts) {
@@ -47,6 +48,7 @@ module.exports = class extends Generator {
   }
   writing() {
     this.log('Finnal options : ' + JSON.stringify(this.options));
+    this.destinationRoot(this.options.projectName);
     this.fs.copyTpl(`${this.templatePath()}/**`, this.destinationPath(), this.options);
   }
 };
