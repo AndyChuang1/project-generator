@@ -5,11 +5,27 @@ module.exports = class extends Generator {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
   }
-  method1() {
-    this.log('method 1 just ran');
+  async ProjectName() {
+    this.options = await this.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Your project name',
+        default: this.appname, // Default to current folder name
+      },
+    ]);
+    this.log('App name : ', this.options);
   }
-
-  method2() {
-    this.log('method 2 just ran');
+  async Database() {
+    this.options = await this.prompt([
+      {
+        type: 'checkbox',
+        name: 'database',
+        message: 'Choose database you use',
+        choices: ['MySQL', 'Redis'],
+        // default: this.appname, // Default to current folder name
+      },
+    ]);
+    this.log('App name : ', this.options.database);
   }
 };
