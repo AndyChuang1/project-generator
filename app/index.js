@@ -61,6 +61,12 @@ module.exports = class extends Generator {
     // this.log(this.destinationPath());
   }
   writing() {
+    const pkgJson = {
+      devDependencies: {
+        eslint: '^3.15.0',
+      },
+      dependencies: {},
+    };
     this.log('Finnal options : ' + JSON.stringify(this.options));
     this.destinationRoot(this.options.projectName);
     // src/database will not copy to file because depend on user's options
@@ -81,6 +87,8 @@ module.exports = class extends Generator {
         this.templatePath('src/database'),
         this.destinationPath('src/server/service/database')
       );
+      pkgJson.dependencies.mysql = '^2.18.1';
+      pkgJson.dependencies.redis = '^3.0.2';
     }
 
     if (this.options.database.length < 2) {
@@ -91,18 +99,22 @@ module.exports = class extends Generator {
             this.templatePath('src/database/mysqlClient.js'),
             this.destinationPath('src/server/service/database/mysqlClient.js')
           );
+          pkgJson.dependencies.mysql = '^2.18.1';
           break;
         case 'Redis':
           this.fs.copy(
             this.templatePath('src/database/redisClient.js'),
             this.destinationPath('src/server/service/database/redisClient.js')
           );
+          pkgJson.dependencies.redis = '^3.0.2';
           break;
         default:
           this.log('No database module');
           break;
       }
     }
+    // Extend or create package.json file in destination path
+    this.fs.extendJSON(this.destinationPath('package.json'), pkgJson);
   }
   install() {
     this.npmInstall();
