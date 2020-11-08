@@ -63,11 +63,45 @@ module.exports = class extends Generator {
   writing() {
     this.log('Finnal options : ' + JSON.stringify(this.options));
     this.destinationRoot(this.options.projectName);
-    this.fs.copyTpl(`${this.templatePath()}/**`, this.destinationPath(), this.options);
+    // src/database will not copy to file because depend on user's options
+    this.fs.copyTpl(
+      [`${this.templatePath()}/**`, '!**/src/database'],
+      this.destinationPath(),
+      this.options
+    );
     const move = (from, to) => {
       this.fs.move(this.destinationPath(from), this.destinationPath(to));
     };
     //Modify file name which contains _
-    move('_.gitignore', '.gitignore');
+    move('_package.json', 'package.json');
+    move('_README.md', 'README.md');
+    //
+    if (this.options.database.length >= 2) {
+      this.fs.copy(
+        this.templatePath('src/database'),
+        this.destinationPath('src/server/service/database')
+      );
+    }
+
+    if (this.options.database.length < 2) {
+      const [database] = this.options.database;
+      switch (database) {
+        case 'MySQL':
+          this.fs.copy(
+            this.templatePath('src/database/mysqlClient.js'),
+            this.destinationPath('src/server/service/database/mysqlClient.js')
+          );
+          break;
+        case 'Redis':
+          this.fs.copy(
+            this.templatePath('src/database/redisClient.js'),
+            this.destinationPath('src/server/service/database/redisClient.js')
+          );
+          break;
+        default:
+          this.log('No database module');
+          break;
+      }
+    }
   }
 };
